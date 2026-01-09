@@ -1,23 +1,14 @@
 "use client"
 
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react"
+import * as React from "react"
+import { ChevronsUpDown, LogOut } from "lucide-react"
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { supabase } from "@/lib/supabase/client"
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -30,16 +21,77 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
+type ViewUser = {
+  name: string
+  email: string
+  avatar: string
+}
+
+type UserMeta = {
+  full_name?: string
+  name?: string
+  display_name?: string
+  avatar_url?: string
+  picture?: string
+}
+
+function initialsFromName(name?: string) {
+  const parts = (name ?? "").trim().split(/\s+/).filter(Boolean)
+  const first = parts[0]?.[0] ?? "U"
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] : ""
+  return (first + last).toUpperCase()
+}
+
+export function NavUser() {
   const { isMobile } = useSidebar()
+  const [user, setUser] = React.useState<ViewUser | null>(null)
+
+  const loadUser = React.useCallback(async () => {
+    const { data, error } = await supabase.auth.getUser()
+
+    if (error || !data?.user) {
+      setUser(null)
+      return
+    }
+
+    const u = data.user
+    const meta = (u.user_metadata ?? {}) as UserMeta
+
+    const name =
+      meta.full_name ??
+      meta.name ??
+      meta.display_name ??
+      u.email?.split("@")[0] ??
+      "User"
+
+    const email = u.email ?? ""
+
+    const avatar = meta.avatar_url ?? meta.picture ?? ""
+
+    setUser({ name, email, avatar })
+  }, [])
+
+  React.useEffect(() => {
+    loadUser()
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      loadUser()
+    })
+
+    return () => {
+      listener.subscription.unsubscribe()
+    }
+  }, [loadUser])
+
+  const onLogout = async () => {
+    await supabase.auth.signOut()
+    // optional redirect
+    // window.location.href = "/login"
+  }
+
+  if (!user) return null
+
+  const initials = initialsFromName(user.name)
 
   return (
     <SidebarMenu>
@@ -52,15 +104,20 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
+
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
+
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
@@ -71,38 +128,21 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
+
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+
+            <DropdownMenuItem onClick={onLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
