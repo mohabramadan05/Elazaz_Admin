@@ -62,7 +62,6 @@ const data = {
         { title: "Products", url: "/dashboard/products" },
         { title: "Variants", url: "/dashboard/variants" },
         { title: "Categories", url: "/dashboard/categories" },
-        { title: "Variant Images", url: "/dashboard/variant-images" },
       ],
     },
 

@@ -18,8 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-
 import {
   Dialog,
   DialogContent,
@@ -65,8 +63,6 @@ type VariantRow = {
   color_id: string | null;
   sku: string | null;
   price: number;
-  compare_at_price: number | null;
-  is_active: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -84,8 +80,6 @@ type VariantInsert = {
   color_id?: string | null;
   sku?: string | null;
   price: number;
-  compare_at_price?: number | null;
-  is_active?: boolean;
 };
 
 type VariantUpdate = Partial<VariantInsert>;
@@ -95,12 +89,10 @@ type VariantImageRow = {
   variant_id: string;
   image_url: string;
   is_main: boolean;
-  sort_order: number | null;
   created_at: string;
 };
 
 function moneyToNumber(v: string) {
-  // accepts "99", "99.9", "99.90"
   const n = Number(v);
   return Number.isFinite(n) ? n : NaN;
 }
@@ -110,11 +102,13 @@ function extFromFile(file: File) {
   return (parts.length > 1 ? parts.pop() : "")?.toLowerCase() || "png";
 }
 
+// NOTE:
+// - This uses public URLs for images.
+// - Create a storage bucket named: "variants"
+// - If you keep it PRIVATE, you must switch to signed URLs instead.
 async function uploadVariantImage(file: File) {
-  // ✅ bucket name
   const bucket = "variants";
-  const filename = `${crypto.randomUUID()}.${extFromFile(file)}`;
-  const path = `variants/${filename}`;
+  const path = `${crypto.randomUUID()}.${extFromFile(file)}`;
 
   const { error: upErr } = await supabase.storage
     .from(bucket)
@@ -125,7 +119,6 @@ async function uploadVariantImage(file: File) {
     });
   if (upErr) throw upErr;
 
-  // If bucket is public:
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   if (!data?.publicUrl)
     throw new Error("Failed to get public URL for uploaded image.");
@@ -154,8 +147,6 @@ export default function VariantsClient() {
   const [colorId, setColorId] = React.useState<string>("__none__");
   const [sku, setSku] = React.useState("");
   const [price, setPrice] = React.useState("");
-  const [compareAt, setCompareAt] = React.useState("");
-  const [isActive, setIsActive] = React.useState(true);
 
   // Delete confirm
   const [openDelete, setOpenDelete] = React.useState(false);
@@ -195,10 +186,9 @@ export default function VariantsClient() {
       supabase
         .from("product_variants")
         .select(
-          "id,product_id,size_id,color_id,sku,price,compare_at_price,is_active,created_at,updated_at"
+          "id,product_id,size_id,color_id,sku,price,created_at,updated_at"
         )
         .order("created_at", { ascending: false }),
-      // fetch main images (if you have variant_images table)
       supabase
         .from("variant_images")
         .select("variant_id,image_url,is_main")
@@ -257,8 +247,6 @@ export default function VariantsClient() {
     setColorId("__none__");
     setSku("");
     setPrice("");
-    setCompareAt("");
-    setIsActive(true);
     setError(null);
     setOpenForm(true);
   }
@@ -271,10 +259,6 @@ export default function VariantsClient() {
     setColorId(row.color_id ?? "__none__");
     setSku(row.sku ?? "");
     setPrice(String(row.price ?? ""));
-    setCompareAt(
-      row.compare_at_price != null ? String(row.compare_at_price) : ""
-    );
-    setIsActive(!!row.is_active);
     setError(null);
     setOpenForm(true);
   }
@@ -293,15 +277,6 @@ export default function VariantsClient() {
       return;
     }
 
-    const ca = compareAt.trim() ? moneyToNumber(compareAt.trim()) : null;
-    if (
-      compareAt.trim() &&
-      (!Number.isFinite(ca as number) || (ca as number) < 0)
-    ) {
-      setError("Compare-at price must be a valid number.");
-      return;
-    }
-
     setSaving(true);
 
     try {
@@ -311,19 +286,12 @@ export default function VariantsClient() {
         color_id: colorId === "__none__" ? null : colorId,
         sku: sku.trim() || null,
         price: p,
-        compare_at_price: ca,
-        is_active: isActive,
       };
 
       if (mode === "create") {
         const { error } = await supabase
           .from("product_variants")
-          .insert(payloadBase)
-          
-          .select(
-            "id,product_id,size_id,color_id,sku,price,compare_at_price,is_active,created_at,updated_at"
-          )
-          .single();
+          .insert(payloadBase);
         if (error) throw error;
 
         await loadAll();
@@ -405,10 +373,10 @@ export default function VariantsClient() {
 
     const { data, error } = await supabase
       .from("variant_images")
-      .select("id,variant_id,image_url,is_main,sort_order,created_at")
+      .select("id,variant_id,image_url,is_main,created_at")
       .eq("variant_id", v.id)
       .order("is_main", { ascending: false })
-      .order("sort_order", { ascending: true });
+      .order("created_at", { ascending: true });
 
     if (error) {
       setError(error.message);
@@ -431,23 +399,21 @@ export default function VariantsClient() {
     try {
       const url = await uploadVariantImage(imageFile);
 
-      // if first image => make it main automatically
       const makeMain = images.length === 0;
 
       if (makeMain) {
-        // unset any main (just in case)
-        await supabase
+        const { error: unErr } = await supabase
           .from("variant_images")
           .update({ is_main: false })
           .eq("variant_id", imagesVariant.id)
           .eq("is_main", true);
+        if (unErr) throw unErr;
       }
 
       const { error } = await supabase.from("variant_images").insert({
         variant_id: imagesVariant.id,
         image_url: url,
         is_main: makeMain,
-        sort_order: images.length + 1,
       });
 
       if (error) throw error;
@@ -468,7 +434,6 @@ export default function VariantsClient() {
     setError(null);
 
     try {
-      // unset current
       const { error: unErr } = await supabase
         .from("variant_images")
         .update({ is_main: false })
@@ -560,7 +525,6 @@ export default function VariantsClient() {
                   <TableHead>Color</TableHead>
                   <TableHead>SKU</TableHead>
                   <TableHead>Price</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead className="w-56 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -569,7 +533,7 @@ export default function VariantsClient() {
                 {loading ? (
                   <TableRow>
                     <TableCell
-                      colSpan={8}
+                      colSpan={7}
                       className="py-10 text-center text-sm text-muted-foreground"
                     >
                       Loading…
@@ -578,7 +542,7 @@ export default function VariantsClient() {
                 ) : filtered.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={8}
+                      colSpan={7}
                       className="py-10 text-center text-sm text-muted-foreground"
                     >
                       No variants found.
@@ -617,17 +581,6 @@ export default function VariantsClient() {
                         {row.sku ?? "—"}
                       </TableCell>
                       <TableCell className="font-medium">{row.price}</TableCell>
-                      <TableCell>
-                        <span
-                          className={
-                            row.is_active
-                              ? "text-emerald-500"
-                              : "text-muted-foreground"
-                          }
-                        >
-                          {row.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </TableCell>
 
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -665,8 +618,8 @@ export default function VariantsClient() {
           </div>
 
           <p className="mt-3 text-xs text-muted-foreground">
-            Bucket required: <span className="font-mono">variants</span>. If you
-            keep it private, we should switch to signed URLs for viewing.
+            Required bucket: <span className="font-mono">variants</span>. If you
+            keep it private, switch to signed URLs.
           </p>
         </CardContent>
       </Card>
@@ -737,7 +690,7 @@ export default function VariantsClient() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="sku">SKU (optional)</Label>
                 <Input
@@ -757,26 +710,6 @@ export default function VariantsClient() {
                   placeholder="e.g. 499"
                 />
               </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="compare">Compare-at (optional)</Label>
-                <Input
-                  id="compare"
-                  value={compareAt}
-                  onChange={(e) => setCompareAt(e.target.value)}
-                  placeholder="e.g. 599"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <div className="font-medium">Active</div>
-                <div className="text-sm text-muted-foreground">
-                  If inactive, customers won’t see this variant.
-                </div>
-              </div>
-              <Switch checked={isActive} onCheckedChange={setIsActive} />
             </div>
           </div>
 
@@ -840,6 +773,7 @@ export default function VariantsClient() {
               <Upload className="mr-2 h-4 w-4" />
               Upload
             </Button>
+
             <div className="text-sm text-muted-foreground">
               {imagesVariant ? (
                 <>
