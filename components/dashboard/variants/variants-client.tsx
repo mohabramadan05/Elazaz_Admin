@@ -481,18 +481,23 @@ export default function VariantsClient() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">All Variants</CardTitle>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search product / size / color / sku…"
-              className="w-72"
+              className="w-full sm:w-72"
             />
 
-            <Button variant="outline" onClick={loadAll} disabled={loading}>
+            <Button
+              variant="outline"
+              onClick={loadAll}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
               <RefreshCw
                 className={
                   loading ? "mr-2 h-4 w-4 animate-spin" : "mr-2 h-4 w-4"
@@ -501,7 +506,7 @@ export default function VariantsClient() {
               Refresh
             </Button>
 
-            <Button onClick={openCreate}>
+            <Button onClick={openCreate} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Add Variant
             </Button>
@@ -583,11 +588,12 @@ export default function VariantsClient() {
                       <TableCell className="font-medium">{row.price}</TableCell>
 
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => openImagesManager(row)}
+                            className="w-full sm:w-auto"
                           >
                             <Images className="mr-2 h-4 w-4" />
                             Images
@@ -596,6 +602,7 @@ export default function VariantsClient() {
                             size="sm"
                             variant="outline"
                             onClick={() => openEdit(row)}
+                            className="w-full sm:w-auto"
                           >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
@@ -604,6 +611,7 @@ export default function VariantsClient() {
                             size="sm"
                             variant="destructive"
                             onClick={() => askDelete(row)}
+                            className="w-full sm:w-auto"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -763,13 +771,18 @@ export default function VariantsClient() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Input
               type="file"
               accept="image/*"
               onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              className="w-full sm:w-auto"
             />
-            <Button onClick={uploadAndAddImage} disabled={saving || !imageFile}>
+            <Button
+              onClick={uploadAndAddImage}
+              disabled={saving || !imageFile}
+              className="w-full sm:w-auto"
+            >
               <Upload className="mr-2 h-4 w-4" />
               Upload
             </Button>

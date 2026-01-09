@@ -361,18 +361,23 @@ export default function CategoriesClient() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">All Categories</CardTitle>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search categories…"
-              className="w-60"
+              className="w-full sm:w-60"
             />
 
-            <Button variant="outline" onClick={load} disabled={loading}>
+            <Button
+              variant="outline"
+              onClick={load}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
               <RefreshCw
                 className={
                   loading ? "mr-2 h-4 w-4 animate-spin" : "mr-2 h-4 w-4"
@@ -381,7 +386,7 @@ export default function CategoriesClient() {
               Refresh
             </Button>
 
-            <Button onClick={openCreate}>
+            <Button onClick={openCreate} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Add Category
             </Button>
@@ -453,11 +458,12 @@ export default function CategoriesClient() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => openEdit(parent)}
+                              className="w-full sm:w-auto"
                             >
                               <Pencil className="mr-2 h-4 w-4" />
                               Edit
@@ -466,6 +472,7 @@ export default function CategoriesClient() {
                               size="sm"
                               variant="destructive"
                               onClick={() => askDelete(parent)}
+                              className="w-full sm:w-auto"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
@@ -504,11 +511,12 @@ export default function CategoriesClient() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => openEdit(child)}
+                              className="w-full sm:w-auto"
                             >
                               <Pencil className="mr-2 h-4 w-4" />
                               Edit
@@ -517,6 +525,7 @@ export default function CategoriesClient() {
                               size="sm"
                               variant="destructive"
                               onClick={() => askDelete(child)}
+                              className="w-full sm:w-auto"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
@@ -591,7 +600,7 @@ export default function CategoriesClient() {
             <div className="grid gap-2">
               <Label>Category Image</Label>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <Input
                   type="file"
                   accept="image/*"
@@ -600,6 +609,7 @@ export default function CategoriesClient() {
                     setImageFile(f);
                     if (f) setRemoveImage(false);
                   }}
+                  className="w-full sm:w-auto"
                 />
 
                 {mode === "edit" && editing?.image_url ? (
@@ -620,7 +630,7 @@ export default function CategoriesClient() {
               </div>
 
               {previewUrl ? (
-                <div className="mt-2 flex items-center gap-4">
+                <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
                   <div className="relative h-20 w-20 overflow-hidden rounded-md border">
                     <Image
                       src={previewUrl}

@@ -222,25 +222,30 @@ export default function ColorsClient() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">All Colors</CardTitle>
 
-          <div className="flex items-center gap-2">
-            <div className="relative">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            <div className="relative w-full sm:w-auto">
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search by name or hex…"
-                className="w-55"
+                className="w-full sm:w-55"
               />
             </div>
 
-            <Button variant="outline" onClick={load} disabled={loading}>
+            <Button
+              variant="outline"
+              onClick={load}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
               <RefreshCw className={cn("mr-2 h-4 w-4", loading && "animate-spin")} />
               Refresh
             </Button>
 
-            <Button onClick={openCreate}>
+            <Button onClick={openCreate} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Add Color
             </Button>
@@ -295,8 +300,13 @@ export default function ColorsClient() {
                         {row.hex_code ?? "—"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm" onClick={() => openEdit(row)}>
+                        <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEdit(row)}
+                            className="w-full sm:w-auto"
+                          >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                           </Button>
@@ -304,6 +314,7 @@ export default function ColorsClient() {
                             variant="destructive"
                             size="sm"
                             onClick={() => askDelete(row)}
+                            className="w-full sm:w-auto"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -346,7 +357,7 @@ export default function ColorsClient() {
 
             <div className="grid gap-2">
               <Label htmlFor="color-hex">Hex code (optional)</Label>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Input
                   id="color-hex"
                   value={hex}
