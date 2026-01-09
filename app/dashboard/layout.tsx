@@ -13,11 +13,13 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { AuthGuard } from "@/components/auth/auth-guard"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider>
-      <AppSidebar />
+    <AuthGuard>
+      <SidebarProvider>
+        <AppSidebar />
 
       <SidebarInset>
         {/* Top bar: trigger + breadcrumb */}
@@ -42,7 +44,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         {/* Page content */}
         <main className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+        </SidebarInset>
+      </SidebarProvider>
+    </AuthGuard>
   )
 }
