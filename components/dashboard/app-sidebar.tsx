@@ -15,7 +15,7 @@ import {
   // Database,
 } from "lucide-react";
 
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { NavMain } from "@/components/dashboard/nav-main";
 import { NavUser } from "@/components/dashboard/nav-user";
 import { TeamSwitcher } from "@/components/dashboard/team-switcher";
@@ -42,7 +42,6 @@ const data = {
     },
   ],
   navMain: [
-
     {
       title: "Overview",
       url: "/dashboard",
@@ -151,8 +150,6 @@ const data = {
     //   ],
     // },
   ],
-
- 
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -165,6 +162,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <ScrollArea className="h-full">
           <NavMain items={data.navMain} />
+          <ScrollBar orientation="vertical" />
         </ScrollArea>
       </SidebarContent>
 

@@ -10,10 +10,9 @@ import {
   RefreshCw,
   Images,
   Upload,
-  Star,
-  StarOff,
 } from "lucide-react";
 
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -815,58 +814,54 @@ export default function VariantsClient() {
             </div>
           ) : null}
 
-          <div className="grid gap-3 md:grid-cols-3">
-            {images.length === 0 ? (
-              <div className="text-sm text-muted-foreground md:col-span-3">
-                No images yet. Upload the first image — it will automatically
-                become the Main image.
-              </div>
-            ) : (
-              images.map((img) => (
-                <div key={img.id} className="rounded-lg border p-3">
-                  <div className="relative aspect-square overflow-hidden rounded-md border">
-                    <Image
-                      src={img.image_url}
-                      alt="Variant image"
-                      fill
-                      sizes="300px"
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between gap-2">
-                    <Button
-                      size="sm"
-                      variant={img.is_main ? "default" : "outline"}
-                      onClick={() => setMainImage(img)}
-                      disabled={saving}
-                    >
-                      {img.is_main ? (
-                        <>
-                          <Star className="mr-2 h-4 w-4" /> Main
-                        </>
-                      ) : (
-                        <>
-                          <StarOff className="mr-2 h-4 w-4" /> Set Main
-                        </>
-                      )}
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => deleteImage(img)}
-                      disabled={saving}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))
-            )}
+          <ScrollArea className="w-full max-w-full whitespace-nowrap rounded-md border">
+  <div className="flex w-max gap-3 p-2">
+    {images.length === 0 ? (
+      <div className="text-sm text-muted-foreground px-2">
+        No images yet. Upload the first image — it will automatically become the
+        Main image.
+      </div>
+    ) : (
+      images.map((img) => (
+        <div key={img.id} className="w-56 shrink-0 rounded-lg border p-3">
+          <div className="relative aspect-square overflow-hidden rounded-md border">
+            <Image
+              src={img.image_url}
+              alt="Variant image"
+              fill
+              sizes="224px"
+              className="object-cover"
+              unoptimized
+            />
           </div>
+
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <Button
+              size="sm"
+              variant={img.is_main ? "default" : "outline"}
+              onClick={() => setMainImage(img)}
+              disabled={saving}
+            >
+              {img.is_main ? "Main" : "Set Main"}
+            </Button>
+
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => deleteImage(img)}
+              disabled={saving}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+
+  <ScrollBar orientation="horizontal" />
+</ScrollArea>
+
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenImages(false)}>
