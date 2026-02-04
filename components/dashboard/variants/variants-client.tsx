@@ -62,6 +62,7 @@ type VariantRow = {
   color_id: string | null;
   sku: string | null;
   price: number;
+  discount_price: number | 0;
   created_at: string;
   updated_at: string;
 };
@@ -79,6 +80,7 @@ type VariantInsert = {
   color_id?: string | null;
   sku?: string | null;
   price: number;
+  discount_price: number | 0;
 };
 
 type VariantUpdate = Partial<VariantInsert>;
@@ -146,6 +148,7 @@ export default function VariantsClient() {
   const [colorId, setColorId] = React.useState<string>("__none__");
   const [sku, setSku] = React.useState("");
   const [price, setPrice] = React.useState("");
+  const [discount_price, setDiscount_price] = React.useState("");
 
   // Delete confirm
   const [openDelete, setOpenDelete] = React.useState(false);
@@ -185,7 +188,7 @@ export default function VariantsClient() {
       supabase
         .from("product_variants")
         .select(
-          "id,product_id,size_id,color_id,sku,price,created_at,updated_at"
+          "id,product_id,size_id,color_id,sku,price,discount_price,created_at,updated_at"
         )
         .order("created_at", { ascending: false }),
       supabase
@@ -246,6 +249,7 @@ export default function VariantsClient() {
     setColorId("__none__");
     setSku("");
     setPrice("");
+    setDiscount_price("");
     setError(null);
     setOpenForm(true);
   }
@@ -258,6 +262,7 @@ export default function VariantsClient() {
     setColorId(row.color_id ?? "__none__");
     setSku(row.sku ?? "");
     setPrice(String(row.price ?? ""));
+    setDiscount_price(String(row.discount_price ?? ""));
     setError(null);
     setOpenForm(true);
   }
@@ -276,6 +281,12 @@ export default function VariantsClient() {
       return;
     }
 
+    const dp = moneyToNumber(discount_price.trim());
+    if (!Number.isFinite(dp) || dp < 0) {
+      setError("Discount Price must be a valid number.");
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -285,6 +296,7 @@ export default function VariantsClient() {
         color_id: colorId === "__none__" ? null : colorId,
         sku: sku.trim() || null,
         price: p,
+        discount_price : dp
       };
 
       if (mode === "create") {
@@ -529,6 +541,7 @@ export default function VariantsClient() {
                   <TableHead>Color</TableHead>
                   <TableHead>SKU</TableHead>
                   <TableHead>Price</TableHead>
+                  <TableHead>Discount Price</TableHead>
                   <TableHead className="w-56 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -585,6 +598,7 @@ export default function VariantsClient() {
                         {row.sku ?? "—"}
                       </TableCell>
                       <TableCell className="font-medium">{row.price}</TableCell>
+                      <TableCell className="font-medium">{row.discount_price}</TableCell>
 
                       <TableCell className="text-right">
                         <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
@@ -639,7 +653,7 @@ export default function VariantsClient() {
               {mode === "create" ? "Add Variant" : "Edit Variant"}
             </DialogTitle>
             <DialogDescription>
-              Variant = Product + (Size optional) + (Color optional) + Price +
+              Variant = Product + (Size optional) + (Color optional) + Price + Discount Price +
               SKU
             </DialogDescription>
           </DialogHeader>
@@ -708,6 +722,17 @@ export default function VariantsClient() {
                 />
               </div>
 
+              {/* <div className="grid gap-2">
+                <Label htmlFor="price">Price</Label>
+                <Input
+                  id="price"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="e.g. 499"
+                />
+              </div> */}
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="price">Price</Label>
                 <Input
@@ -715,6 +740,15 @@ export default function VariantsClient() {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="e.g. 499"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="Dprice">Discount Price</Label>
+                <Input
+                  id="Dprice"
+                  value={discount_price}
+                  onChange={(e) => setDiscount_price(e.target.value)}
+                  placeholder="0"
                 />
               </div>
             </div>
