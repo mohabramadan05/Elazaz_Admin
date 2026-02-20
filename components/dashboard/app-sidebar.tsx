@@ -5,11 +5,11 @@ import {
   LayoutDashboard,
   ShoppingBag,
   Layers3,
-  // Users,
-  // ClipboardList,
+  Users,
+  ClipboardList,
   // Truck,
-  // TicketPercent,
-  // Star,
+  TicketPercent,
+  Star,
   // Settings2,
   Shield,
   // Database,
@@ -49,7 +49,7 @@ const data = {
       isActive: true,
       items: [
         { title: "Dashboard", url: "/dashboard" },
-        // { title: "Analytics", url: "/dashboard/analytics" },
+        { title: "Analytics", url: "/dashboard/analytics" },
       ],
     },
 
@@ -74,19 +74,20 @@ const data = {
       ],
     },
 
-    // {
-    //   title: "Orders",
-    //   url: "/dashboard/orders",
-    //   icon: ClipboardList,
-    //   items: [
-    //     { title: "All Orders", url: "/dashboard/orders" },
-    //     { title: "Pending", url: "/dashboard/orders?status=pending" },
-    //     { title: "Paid", url: "/dashboard/orders?status=paid" },
-    //     { title: "Shipped", url: "/dashboard/orders?status=shipped" },
-    //     { title: "Delivered", url: "/dashboard/orders?status=delivered" },
-    //     { title: "Cancelled", url: "/dashboard/orders?status=cancelled" },
-    //   ],
-    // },
+    {
+      title: "Orders",
+      url: "/dashboard/orders",
+      icon: ClipboardList,
+      items: [
+        { title: "All Orders", url: "/dashboard/orders" },
+        { title: "Unpaid", url: "/dashboard/orders?status=unpaid" },
+        { title: "Paid", url: "/dashboard/orders?status=paid" },
+        { title: "Failed", url: "/dashboard/orders?status=failed" },
+        { title: "Preparing", url: "/dashboard/orders?status=preparing" },
+        { title: "Done", url: "/dashboard/orders?status=done" },
+        { title: "Cancelled", url: "/dashboard/orders?status=cancelled" },
+      ],
+    },
 
     // {
     //   title: "Shipping",
@@ -98,35 +99,34 @@ const data = {
     //   ],
     // },
 
-    // {
-    //   title: "Marketing",
-    //   url: "/dashboard/marketing",
-    //   icon: TicketPercent,
-    //   items: [
-    //     { title: "Promo Codes", url: "/dashboard/promo-codes" },
-    //     { title: "Discount Rules", url: "/dashboard/discounts" },
-    //   ],
-    // },
+    {
+      title: "Marketing",
+      url: "/dashboard/marketing",
+      icon: TicketPercent,
+      items: [
+        { title: "Promo Codes", url: "/dashboard/promo-codes" },
+        { title: "Promo Codes Usage Rules", url: "/dashboard/promo-codes-usage" },
+      ],
+    },
 
-    // {
-    //   title: "Reviews",
-    //   url: "/dashboard/reviews",
-    //   icon: Star,
-    //   items: [
-    //     { title: "All Reviews", url: "/dashboard/reviews" },
-    //     { title: "Reported", url: "/dashboard/reviews/reported" },
-    //   ],
-    // },
+    {
+      title: "Reviews",
+      url: "/dashboard/reviews",
+      icon: Star,
+      items: [
+        { title: "All Reviews", url: "/dashboard/reviews" },
+      ],
+    },
 
-    // {
-    //   title: "Customers",
-    //   url: "/dashboard/customers",
-    //   icon: Users,
-    //   items: [
-    //     { title: "Customers", url: "/dashboard/customers" },
-    //     { title: "Admins", url: "/dashboard/admins" },
-    //   ],
-    // },
+    {
+      title: "Users",
+      url: "/dashboard/customers",
+      icon: Users,
+      items: [
+        { title: "Customers", url: "/dashboard/customers" },
+        { title: "Admins", url: "/dashboard/admins" },
+      ],
+    },
 
     // {
     //   title: "System",
